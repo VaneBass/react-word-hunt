@@ -24,8 +24,9 @@ const Definitions = ({ word, meanings, category, lightMode }) => {
       ) : (
         meanings.map((mean) =>
           mean.meanings.map((item) =>
-            item.definitions.map((def) => (
+            item.definitions.map((def, index) => (
               <div
+                key={`${index}-${def}`}
                 className="single-mean"
                 style={{
                   backgroundColor: lightMode ? "#3b5360" : "white",

@@ -8,7 +8,14 @@ import {
 } from "@material-ui/core";
 import categories from "../../data/category";
 
-const Header = ({ category, setCategory, word, setWord, lightMode }) => {
+const Header = ({
+  category,
+  setCategory,
+  word,
+  setWord,
+  setMeanings,
+  lightMode,
+}) => {
   // 默认为黑暗主题
   const darkTheme = createTheme({
     palette: {
@@ -19,10 +26,17 @@ const Header = ({ category, setCategory, word, setWord, lightMode }) => {
     },
   });
 
-  // 切换语言的同时，清除已输入的文字
-  const handleChange = (language) => {
+  // 检测输入字符并改变 word 值
+  function changeWord(input) {
+    let trimedInput = input.trim();
+    trimedInput.length === 0 ? setWord("") : setWord(trimedInput);
+  }
+
+  // 切换语言的同时，清除已输入的文字与其含义
+  const changeCategory = (language) => {
     setCategory(language);
     setWord("");
+    setMeanings([]);
   };
 
   return (
@@ -36,7 +50,7 @@ const Header = ({ category, setCategory, word, setWord, lightMode }) => {
             label="Search a word"
             variant="standard"
             value={word}
-            onChange={(e) => setWord(e.target.value)}
+            onChange={(e) => changeWord(e.target.value)}
           />
           {/* 语言下拉选项 */}
           <TextField
@@ -44,7 +58,7 @@ const Header = ({ category, setCategory, word, setWord, lightMode }) => {
             select
             label="language"
             value={category}
-            onChange={(e) => handleChange(e.target.value)}
+            onChange={(e) => changeCategory(e.target.value)}
             variant="standard"
           >
             {categories.map((option) => (

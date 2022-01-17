@@ -11,7 +11,6 @@ const categories = [
   { value: "Brazilian Portuguese", label: "pt-BR" },
   { value: "Arabic", label: "ar" },
   { value: "Turkish", label: "tr" },
-  { value: "Chinese", label: "ch" },
 ];
 
 export default categories;

@@ -1,7 +1,7 @@
 import React from "react";
 import "./style.css";
 
-const Definitions = ({ word, meanings, category, lightMode }) => {
+const Definitions = ({ word, hasMeaning, meanings, category, lightMode }) => {
   return (
     <div className="meanings">
       {/* 当语言是英文时，显示音频 */}
@@ -11,17 +11,20 @@ const Definitions = ({ word, meanings, category, lightMode }) => {
             meanings[0].phonetics[0] &&
             `https:` + meanings[0].phonetics[0].audio
           }
-          style={{ backgroundColor: "#fff", borderRadius: 10 }}
+          style={{
+            display: "block",
+            backgroundColor: "#fff",
+            borderRadius: 10,
+          }}
           controls
         >
           Your Browser doesn't support audio element.
         </audio>
       )}
-
       {/* 输入了关键词后渲染 */}
       {word === "" ? (
         <span className="subtitle">Start by typing a word in Search</span>
-      ) : (
+      ) : hasMeaning ? (
         meanings.map((mean) =>
           mean.meanings.map((item) =>
             item.definitions.map((def, index) => (
@@ -54,6 +57,11 @@ const Definitions = ({ word, meanings, category, lightMode }) => {
             ))
           )
         )
+      ) : (
+        <span className="subtitle">
+          No Result, please ensure you are using the corresponding language of
+          the word in search
+        </span>
       )}
     </div>
   );

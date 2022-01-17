@@ -1,6 +1,5 @@
-import "./App.css";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Container, Switch } from "@material-ui/core";
 import Header from "./components/Header";
 import Definitions from "./components/Definitions";
@@ -9,6 +8,7 @@ import { grey } from "@material-ui/core/colors";
 
 function App() {
   const [word, setWord] = useState("");
+  const [hasMeaning, setHasMeaning] = useState(true);
   const [meanings, setMeanings] = useState([]);
   const [category, setCategory] = useState("en");
   const [lightMode, setLightMode] = useState(false);
@@ -25,22 +25,51 @@ function App() {
     },
   }));
 
-  useEffect(() => {
-    const dictionaryApi = async () => {
-      if (word) {
-        try {
-          const data = await axios.get(
-            `https://api.dictionaryapi.dev/api/v2/entries/${category}/${word}`
-          );
-          setMeanings(data.data);
-        } catch (error) {
-          console.log(error);
+  // 防抖函数
+  function useDebounce(fn, delay) {
+    const { current } = useRef({ fn, timer: null });
+    useEffect(
+      function () {
+        current.fn = fn;
+      },
+      [current, fn]
+    );
+
+    return useCallback(
+      (...args) => {
+        if (current.timer) {
+          clearTimeout(current.timer);
         }
+        current.timer = setTimeout(() => {
+          current.fn.call(this, ...args);
+        }, delay);
+      },
+      [current, delay]
+    );
+  }
+
+  // 请求api获取词义
+  async function getMeanings() {
+    if (word) {
+      try {
+        const data = await axios.get(
+          `https://api.dictionaryapi.dev/api/v2/entries/${category}/${word}`
+        );
+        setHasMeaning(true);
+        setMeanings(data.data);
+      } catch (error) {
+        console.log(error);
+        // 请求失败
+        setHasMeaning(false);
+        setMeanings([]);
       }
-      return;
-    };
-    dictionaryApi();
-  }, [word, category]);
+    }
+  }
+
+  // 使用防抖函数
+  let showMeanings = useDebounce(getMeanings, 500);
+
+  useEffect(showMeanings, [showMeanings, category, word]);
 
   return (
     <div
@@ -67,7 +96,9 @@ function App() {
           <span>{lightMode ? "Dark" : "Light"}</span>
           <DarkMode
             checked={lightMode}
-            onChange={() => setLightMode(!lightMode)}
+            onChange={() => {
+              setLightMode(!lightMode);
+            }}
           />
         </div>
         <Header
@@ -75,11 +106,13 @@ function App() {
           setCategory={setCategory}
           word={word}
           setWord={setWord}
+          setMeanings={setMeanings}
           lightMode={lightMode}
         />
         {meanings && (
           <Definitions
             word={word}
+            hasMeaning={hasMeaning}
             meanings={meanings}
             category={category}
             lightMode={lightMode}
